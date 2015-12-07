@@ -25,3 +25,19 @@ func Error404(w http.ResponseWriter, r *http.Request) {
 		//peace
 	}
 }
+
+func Error401(w http.ResponseWriter, r *http.Request) {
+	response := JsonResponse{
+		Status: "401",
+		Data:   "No Auth",
+	}
+	w.Header().Set("Content-Type", "application/json")
+
+	myjsonresponse, err := json.Marshal(response)
+
+	if err == nil {
+		w.Write(myjsonresponse)
+	} else {
+		//peace
+	}
+}
