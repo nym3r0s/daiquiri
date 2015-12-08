@@ -10,8 +10,9 @@ go get -u github.com/gorilla/sessions
 go get -u github.com/gorilla/websocket
 
 # SQL driver. 
-echo "Installing SQLx"
-go get -u github.com/jmoiron/sqlx
+echo "Installing SQL Drivers"
+go get github.com/go-sql-driver/mysql
+go get -u github.com/jinzhu/gorm
 # To simplify middleware and a bit of abstraction
 echo "Installing Negroni"
 go get -u github.com/codegangsta/negroni
