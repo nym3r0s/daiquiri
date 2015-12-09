@@ -23,6 +23,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	name := r.Form["name"][0]
 	age, err = strconv.Atoi(r.Form["age"][0])
 
+	if err != nil {
+		WriteJson(w, r, "400", "Incorrect Data")
+		return
+	}
 	// Make the new user object
 	newUser := database.User{
 		UserName: name,
@@ -43,13 +47,20 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	if existingUser.UserId == 0 {
 		// No user exists
 		db.Create(&newUser)
+
+		if newUser.UserId == 0 {
+			WriteJson(w, r, "400", "User Already Exists")
+			return
+		}
 		// Set response
 		WriteJson(w, r, "200", strconv.Itoa(newUser.UserId))
+		return
 		// fmt.Println(newUser)
 	} else {
 		// User already exists
 		// Set response
 		WriteJson(w, r, "400", "User Already Exists")
+		return
 	}
 }
 
