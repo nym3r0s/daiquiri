@@ -39,18 +39,19 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Check if user exists
 	existingUser := new(database.User)
 
-	db.Where(map[string]interface{}{"name": name, "age": age}).Find(&existingUser)
+	db.Where(newUser).First(&existingUser)
 
 	// fmt.Println("Existing User")
 	// fmt.Println(existingUser)
 
 	// Check if there is an exsiting user
-	if existingUser == nil {
+	if existingUser.UserId == 0 {
 		// No user exists
 		db.Create(&newUser)
 		// Set response
 		response.Status = "201"
 		response.Data = "User Successfully Created"
+		// fmt.Println(newUser)
 	} else {
 		// User already exists
 		// Set response

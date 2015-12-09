@@ -13,6 +13,11 @@ go get -u github.com/gorilla/websocket
 echo "Installing SQL Drivers"
 go get github.com/go-sql-driver/mysql
 go get -u github.com/jinzhu/gorm
+
+# Validator
+echo "Installing Validator"
+go get github.com/asaskevich/govalidator
+
 # To simplify middleware and a bit of abstraction
 echo "Installing Negroni"
 go get -u github.com/codegangsta/negroni
