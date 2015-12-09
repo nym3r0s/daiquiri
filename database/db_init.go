@@ -45,9 +45,24 @@ func Run_Migrations() {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println("Created Table")
+		fmt.Println("Created User Table")
 	}
 
+	err = db.CreateTable(&Friend{})
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Created Friend Table")
+	}
+
+	err = db.CreateTable(&AppTokens{})
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Created AppTokens Table")
+	}
 }
 
 func Get_DB_Object(path string) gorm.DB {

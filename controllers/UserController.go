@@ -11,11 +11,6 @@ import (
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 
-	response := JsonResponse{
-		Status: "404",
-		Data:   "API route not found",
-	}
-
 	err := r.ParseForm()
 
 	if err != nil {
@@ -24,21 +19,21 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(r.Form)
 	var age int
+
 	name := r.Form["name"][0]
 	age, err = strconv.Atoi(r.Form["age"][0])
 
 	// Make the new user object
 	newUser := database.User{
-		Name: name,
-		Age:  age,
+		UserName: name,
+		UserAge:  age,
 	}
-	// DB operations start here
 
+	// DB operations start here
 	db := database.Get_DB_Object("./database/db_config.json")
 
 	// Check if user exists
 	existingUser := new(database.User)
-
 	db.Where(newUser).First(&existingUser)
 
 	// fmt.Println("Existing User")
@@ -49,24 +44,31 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		// No user exists
 		db.Create(&newUser)
 		// Set response
-		response.Status = "201"
-		response.Data = "User Successfully Created"
+		WriteJson(w, r, "200", strconv.Itoa(newUser.UserId))
 		// fmt.Println(newUser)
 	} else {
 		// User already exists
 		// Set response
-		response.Status = "400"
-		response.Data = "User Already Exists!"
+		WriteJson(w, r, "400", "User Already Exists")
 	}
+}
 
-	// Marshal JSON and send it back
-	myjsonresponse, err2 := json.Marshal(response)
-	// Set content type
+func WriteJson(w http.ResponseWriter, r *http.Request, status string, data string) {
+
 	w.Header().Set("Content-Type", "application/json")
 
-	if err2 == nil {
+	response := JsonResponse{
+		Status: status,
+		Data:   data,
+	}
+
+	myjsonresponse, err := json.Marshal(response)
+
+	if err == nil {
 		w.Write(myjsonresponse)
 	} else {
 		//peace
+		fmt.Println("Error in response data", err)
 	}
+
 }
