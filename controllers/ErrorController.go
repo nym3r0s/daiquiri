@@ -12,7 +12,7 @@ type JsonResponse struct {
 
 func Error404(w http.ResponseWriter, r *http.Request) {
 	response := JsonResponse{
-		Status: "404",
+		Status: "ERR",
 		Data:   "API route not found",
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -28,7 +28,7 @@ func Error404(w http.ResponseWriter, r *http.Request) {
 
 func Error401(w http.ResponseWriter, r *http.Request) {
 	response := JsonResponse{
-		Status: "401",
+		Status: "AUTH",
 		Data:   "No Auth",
 	}
 	w.Header().Set("Content-Type", "application/json")

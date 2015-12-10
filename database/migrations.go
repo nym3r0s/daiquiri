@@ -18,22 +18,22 @@ type DbConfig struct {
 
 // User Table
 type User struct {
-	UserId int `gorm:"primary_key"`
+	UserId int `gorm:"primary_key" valid:"-"`
 
-	UserName  string
-	UserEmail string `sql:"UNIQUE"`
-	UserPhone string `sql:"not null;UNIQUE"`
+	UserName  string `valid:"length(1|255),required"`
+	UserEmail string `sql:"UNIQUE" valid:"email,required"`
+	UserPhone string `sql:"not null;UNIQUE" valid:"numeric,required,length(10|10)"`
 
-	UserAge    int
-	UserAadhar string `sql:"UNIQUE"`
+	UserAge    int    `valid:"required"`
+	UserAadhar string `sql:"UNIQUE" valid:"alphanum"`
 
-	Safe bool `sql:"default:false"`
+	Safe bool `sql:"default:false" valid:"-"`
 
-	PosLat  float64
-	PosLong float64
+	PosLat  string `valid:"latitude,required"`
+	PosLong string `valid:"longitude,required"`
 
-	CreatedAt time.Time `sql:"default:now()"`
-	UpdatedAt time.Time `sql:"default:now()"`
+	CreatedAt time.Time `sql:"default:now()" valid:"-"`
+	UpdatedAt time.Time `sql:"default:now()" valid:"-"`
 }
 
 type Friend struct {
