@@ -82,8 +82,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println("Existing User")
 	// fmt.Println(existingUser)
 
-	// Check if there is an exsiting user
-	if existingUser.UserId == 0 {
+	var dupUser database.User
+	var dupAdharUser database.User
+	dupAdharUser.UserId = 0
+
+	db.Where("user_email = ?", newUser.UserEmail).Or("user_phone = ?", newUser.UserPhone).First(&dupUser)
+
+	if aadhar != "" {
+		db.Where("user_aadhar = ?", aadhar).First(&dupAdharUser)
+	}
+	// Check if there is an existing user
+	if existingUser.UserId == 0 && dupUser.UserId == 0 && dupAdharUser.UserId == 0 {
 		// No user exists
 		db.Create(&newUser)
 
