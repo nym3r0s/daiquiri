@@ -3,7 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/GokulSrinivas/daiquiri/controllers"
+	"github.com/GokulSrinivas/daiquiri/controllers/errorcontroller"
+	"github.com/GokulSrinivas/daiquiri/controllers/usercontroller"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 )
@@ -12,10 +13,10 @@ func main() {
 	router := mux.NewRouter()
 	apirouter := router.PathPrefix("/api").Subrouter()
 
-	apirouter.HandleFunc("/user/create", controllers.CreateUser).Methods("POST")
+	apirouter.HandleFunc("/user/create", usercontroller.CreateUser).Methods("POST")
 
-	router.NotFoundHandler = http.HandlerFunc(controllers.Error404)
-	apirouter.NotFoundHandler = http.HandlerFunc(controllers.Error404)
+	router.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
+	apirouter.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
 
 	n := negroni.Classic()
 	n.UseHandler(router)

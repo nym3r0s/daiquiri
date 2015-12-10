@@ -25,7 +25,7 @@ type User struct {
 	UserPhone string `sql:"not null;UNIQUE" valid:"numeric,required,length(10|10)"`
 
 	UserAge    int    `valid:"required"`
-	UserAadhar string `sql:"UNIQUE" valid:"alphanum"`
+	UserAadhar string `sql:"UNIQUE;default:null" valid:"alphanum"`
 
 	Safe bool `sql:"default:false" valid:"-"`
 

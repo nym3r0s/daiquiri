@@ -1,11 +1,11 @@
-package controllers
+package usercontroller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/GokulSrinivas/daiquiri/controllers"
 	"github.com/GokulSrinivas/daiquiri/database"
 	"github.com/asaskevich/govalidator"
 )
@@ -16,7 +16,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		// fmt.Println("Error: ", err)
-		Error404(w, r)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
 	}
 	fmt.Println(r.Form)
 
@@ -41,7 +42,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	emptyerr = emptyerr || ageerr != nil
 
 	if emptyerr {
-		WriteJson(w, r, "ERR", "Incorrect Data, Missing Fields")
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Missing Fields")
 		return
 		fmt.Println("Failed Empty check")
 	}
@@ -67,7 +68,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	_, structerr := govalidator.ValidateStruct(newUser)
 	if structerr != nil {
 		fmt.Println(structerr)
-		WriteJson(w, r, "ERR", structerr.Error())
+		controllers.WriteJson(w, r, "ERR", structerr.Error())
 		return
 	}
 
@@ -87,37 +88,17 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		db.Create(&newUser)
 
 		if newUser.UserId == 0 {
-			WriteJson(w, r, "ERR", "Bad Data - User Already Exists")
+			controllers.WriteJson(w, r, "ERR", "Bad Data - User Already Exists")
 			return
 		}
 		// Set response
-		WriteJson(w, r, "OK", strconv.Itoa(newUser.UserId))
+		controllers.WriteJson(w, r, "OK", strconv.Itoa(newUser.UserId))
 		return
 		// fmt.Println(newUser)
 	} else {
 		// User already exists
 		// Set response
-		WriteJson(w, r, "ERR", "User Already Exists")
+		controllers.WriteJson(w, r, "ERR", "User Already Exists")
 		return
 	}
-}
-
-func WriteJson(w http.ResponseWriter, r *http.Request, status string, data string) {
-
-	w.Header().Set("Content-Type", "application/json")
-
-	response := JsonResponse{
-		Status: status,
-		Data:   data,
-	}
-
-	myjsonresponse, err := json.Marshal(response)
-
-	if err == nil {
-		w.Write(myjsonresponse)
-	} else {
-		//peace
-		fmt.Println("Error in response data", err)
-	}
-
 }
