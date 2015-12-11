@@ -1,3 +1,5 @@
 database/db_config.json
 router
 gin-bin
+mail/mail_config.json
+tmp

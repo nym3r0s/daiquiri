@@ -7,6 +7,7 @@ import (
 
 	"github.com/GokulSrinivas/daiquiri/controllers"
 	"github.com/GokulSrinivas/daiquiri/database"
+	"github.com/GokulSrinivas/daiquiri/mail"
 	"github.com/asaskevich/govalidator"
 )
 
@@ -110,4 +111,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		controllers.WriteJson(w, r, "ERR", "User Already Exists")
 		return
 	}
+}
+
+func SendOTPEmail(w http.ResponseWriter, r *http.Request) {
+	mail.Config_Init("./mail/mail_config.json")
+	mail.SendMail("gokusrinivas@gmail.com", "Hi. Your OTP is 123123")
 }
