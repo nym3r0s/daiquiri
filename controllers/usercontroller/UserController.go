@@ -19,7 +19,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
 		return
 	}
-	fmt.Println(r.Form)
+	// fmt.Println(r.Form)
 
 	// Getting form data
 	name := r.FormValue("name")

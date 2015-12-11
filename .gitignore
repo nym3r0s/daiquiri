@@ -1,1 +1,3 @@
-/database/db_config.json
+database/db_config.json
+router
+gin-bin
