@@ -21,4 +21,6 @@ go get github.com/asaskevich/govalidator
 # To simplify middleware and a bit of abstraction
 echo "Installing Negroni"
 go get -u github.com/codegangsta/negroni
+echo "Installing fresh"
+go get -u github.com/pilu/fresh
 echo "Done! Build and deploy!"
