@@ -61,3 +61,14 @@ type AppTokens struct {
 	AppCreatedAt time.Time `sql:"default:now()"`
 	AppUpdatedAt time.Time `sql:"default:now()"`
 }
+
+type Admin struct {
+	AdminHandle   string    `gorm:"primary_key"`
+	AdminEmail    string    `sql:""`
+	AdminMno      string    `sql:""`
+	AdminName     string    `sql:""`
+	Sudo          int       `sql:"default:0"`
+	AdminPassword string    `sql:""`
+	CreatedAt     time.Time `sql:"default:now()"`
+	UpdatedAt     time.Time `sql:"default:now()"`
+}

@@ -63,6 +63,13 @@ func Run_Migrations() {
 	} else {
 		fmt.Println("Created AppTokens Table")
 	}
+	err = db.CreateTable(&Admin{})
+
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Created Admin Table")
+	}
 }
 
 func Get_DB_Object(path string) gorm.DB {
