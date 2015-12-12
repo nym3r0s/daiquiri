@@ -239,14 +239,6 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Failed Empty check")
 	}
 
-	// // Validate with Govalidator - Should catch all the errors
-	// _, structerr := govalidator.ValidateStruct(newUser)
-	// if structerr != nil {
-	// 	fmt.Println(structerr)
-	// 	controllers.WriteJson(w, r, "ERR", structerr.Error())
-	// 	return
-	// }
-
 	// DB operations start here
 	db := database.Get_DB_Object("./database/db_config.json")
 	var newUser database.User
@@ -275,4 +267,60 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	controllers.WriteJson(w, r, "OK", "Updated Successfully")
 	return
+}
+
+func UpdateStatus(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+	fmt.Println(r.Form)
+
+	// Getting form data
+	phone := r.FormValue("phone")
+
+	lat := r.FormValue("lat")
+	long := r.FormValue("long")
+
+	safe := r.FormValue("safe")
+	if safe == "" {
+		safe = "false"
+	}
+	safebool, err2 := strconv.ParseBool(safe)
+
+	if err2 != nil || lat == "" || long == "" || !govalidator.IsLatitude(lat) || !govalidator.IsLongitude(long) {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+
+	// DB operations start here
+	db := database.Get_DB_Object("./database/db_config.json")
+	var newUser database.User
+	db.Where("user_phone = ?", phone).First(&newUser)
+	// Make the new user object
+	if newUser.UserId == 0 {
+		fmt.Println(newUser)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, User not found")
+		return
+	}
+
+	newUser.PosLat = lat
+	newUser.PosLong = long
+	newUser.Safe = safebool
+	db.Save(&newUser)
+
+	if newUser.UserAadhar != "" {
+		// Peace
+		// db.Exec("UPDATE user SET user_aadhar=? WHERE user_id = ?", aadhar, newUser.UserId)
+	} else {
+		fmt.Println("Empty Aadhar Number")
+		db.Exec("UPDATE user SET user_aadhar=NULL WHERE user_id = ? and user_aadhar='' ", newUser.UserId)
+	}
+
+	controllers.WriteJson(w, r, "OK", "Updated Successfully")
+	return
+
 }

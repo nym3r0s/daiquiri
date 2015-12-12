@@ -15,10 +15,12 @@ func main() {
 	router := mux.NewRouter()
 	apirouter := router.PathPrefix("/api").Subrouter()
 	secureapirouter := router.PathPrefix("/api/s").Subrouter()
+
 	apirouter.HandleFunc("/user/create", usercontroller.CreateUser).Methods("POST")
 	apirouter.HandleFunc("/user/auth", usercontroller.AuthOTP).Methods("POST")
 
 	secureapirouter.HandleFunc("/user/updateprofile", middleware.UserAuth(usercontroller.UpdateProfile))
+	secureapirouter.HandleFunc("/user/updatestatus", middleware.UserAuth(usercontroller.UpdateStatus))
 
 	router.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
 	apirouter.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
