@@ -18,6 +18,7 @@ func main() {
 
 	apirouter.HandleFunc("/user/create", usercontroller.CreateUser).Methods("POST")
 	apirouter.HandleFunc("/user/auth", usercontroller.AuthOTP).Methods("POST")
+	apirouter.HandleFunc("/user/login", usercontroller.Login).Methods("POST")
 
 	secureapirouter.HandleFunc("/user/updateprofile", middleware.UserAuth(usercontroller.UpdateProfile))
 	secureapirouter.HandleFunc("/user/updatestatus", middleware.UserAuth(usercontroller.UpdateStatus))

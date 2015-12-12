@@ -333,3 +333,57 @@ func UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	s1 := rand.NewSource(time.Now().UnixNano())
+	myrand := rand.New(s1)
+	err := r.ParseForm()
+
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. FormParseError")
+		return
+	}
+	fmt.Println(r.Form)
+
+	// Getting form data
+	phone := r.FormValue("phone")
+	if phone == "" {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. Missing Field")
+		return
+	}
+
+	// DB operations start here
+	db := database.Get_DB_Object("./database/db_config.json")
+	var newUser database.User
+	db.Where("user_phone = ?", phone).First(&newUser)
+	// Make the new user object
+	if newUser.UserId == 0 {
+		fmt.Println(newUser)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, User not found")
+		return
+	}
+
+	var apikey database.AppTokens
+
+	db.Where("user_id = ?", newUser.UserId).First(&apikey)
+
+	apikey.AppOtp = myrand.Intn(100000000)
+	apikey.AppSessionId = RandString(32)
+
+	db.Save(&apikey)
+
+	if apikey.ReqId == 0 {
+		controllers.WriteJson(w, r, "ERR", "Err in saving new apikey")
+		return
+	}
+
+	// Send OTP
+	go func() {
+		SendOTPEmail(w, r, newUser.UserEmail, strconv.Itoa(apikey.AppOtp))
+	}()
+	// Set response
+	controllers.WriteJson(w, r, "OK", "USER OTP reset")
+	return
+
+}
