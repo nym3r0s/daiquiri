@@ -24,6 +24,7 @@ func main() {
 
 	secureapirouter.HandleFunc("/user/updateprofile", middleware.UserAuth(usercontroller.UpdateProfile))
 	secureapirouter.HandleFunc("/user/updatestatus", middleware.UserAuth(usercontroller.UpdateStatus))
+	secureapirouter.HandleFunc("/user/updatestatusaadhar", middleware.UserAuth(usercontroller.UpdateStatusAadhar))
 
 	adminapirouter.HandleFunc("/getmapdata", admincontroller.GetMapData).Methods("POST")
 

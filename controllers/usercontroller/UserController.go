@@ -389,3 +389,36 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func UpdateStatusAadhar(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. FormParseError")
+		return
+	}
+	fmt.Println(r.Form)
+
+	// Getting form data
+	aadhar := r.FormValue("aadhar")
+
+	if aadhar == "" {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. empty fields")
+		return
+	}
+
+	db := database.Get_DB_Object("./database/db_config.json")
+
+	var newUser database.User
+	db.Where("user_aadhar = ?", aadhar).First(&newUser)
+
+	if newUser.UserId != 0 {
+		newUser.Safe = true
+		db.Save(&newUser)
+	} else {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. User Not Found")
+		return
+	}
+}
