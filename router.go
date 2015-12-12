@@ -16,7 +16,6 @@ func main() {
 
 	apirouter.HandleFunc("/user/create", usercontroller.CreateUser).Methods("POST")
 	apirouter.HandleFunc("/user/auth", usercontroller.AuthOTP).Methods("POST")
-	apirouter.HandleFunc("/user/mail", usercontroller.SendOTPEmail).Methods("POST")
 
 	router.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
 	apirouter.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)

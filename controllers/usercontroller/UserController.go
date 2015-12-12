@@ -44,7 +44,8 @@ func RandString(n int) string {
 // The User Related functions come here
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-
+	s1 := rand.NewSource(time.Now().UnixNano())
+	myrand := rand.New(s1)
 	err := r.ParseForm()
 
 	if err != nil {
@@ -137,11 +138,15 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		apikey := database.AppTokens{
 			UserId:       newUser.UserId,
 			User:         newUser,
-			AppOtp:       rand.Intn(100000000),
+			AppOtp:       myrand.Intn(100000000),
 			AppSessionId: RandString(32),
 		}
 
 		db.Create(&apikey)
+		// Send OTP
+		go func() {
+			SendOTPEmail(w, r, newUser.UserEmail, strconv.Itoa(apikey.AppOtp))
+		}()
 		// Set response
 		controllers.WriteJson(w, r, "OK", "USER CREATED")
 		return
@@ -154,9 +159,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SendOTPEmail(w http.ResponseWriter, r *http.Request) {
+func SendOTPEmail(w http.ResponseWriter, r *http.Request, to string, msg string) {
 	mail.Config_Init("./mail/mail_config.json")
-	mail.SendMail("gokusrinivas@gmail.com", "<html>Hi. Your OTP is 123123</html>")
+	mail.SendMail(to, "<html>Hi. Your OTP is "+msg+"</html>")
 }
 
 func AuthOTP(w http.ResponseWriter, r *http.Request) {
