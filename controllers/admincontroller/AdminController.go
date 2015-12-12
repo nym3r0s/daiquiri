@@ -6,7 +6,7 @@ import (
 	// "math/rand"
 	"encoding/json"
 	"net/http"
-	// "strconv"
+	"strconv"
 	// "time"
 
 	"github.com/GokulSrinivas/daiquiri/controllers"
@@ -95,4 +95,58 @@ func GetMapData(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error in response data", err)
 	}
 
+}
+
+func UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+
+	admin_handle := r.FormValue("admin_handle")
+	admin_pass := r.FormValue("admin_password")
+	user_phone := r.FormValue("admin_password")
+	user_status, err2 := strconv.ParseBool(r.FormValue("admin_password"))
+
+	if admin_handle == "" || admin_pass == "" || err2 != nil {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Empty value")
+		return
+	}
+
+	var newAdmin database.Admin
+	// newAdmin := database.Admin{
+	// AdminHandle:   admin_handle,
+	// AdminPassword: admin_pass,
+	// }
+
+	db := database.Get_DB_Object("./database/db_config.json")
+
+	db.Where("admin_handle = ?", admin_handle).Where("admin_password = ?", admin_pass).First(&newAdmin)
+
+	fmt.Println(newAdmin.AdminHandle == "")
+
+	if newAdmin.AdminHandle == "" {
+		controllers.WriteJson(w, r, "AUTH", "Invalid Credentials")
+		return
+	}
+
+	// Authenticated User. Send the data
+
+	var newUser database.User
+
+	db.Where("user_phone = ?", user_phone).First(&newUser)
+
+	if newUser.UserId == 0 {
+		controllers.WriteJson(w, r, "ERR", "No user exists")
+		return
+	}
+
+	newUser.Safe = user_status
+	db.Save(&newUser)
+
+	controllers.WriteJson(w, r, "OK", "Status Updated Successfully")
+	return
 }
