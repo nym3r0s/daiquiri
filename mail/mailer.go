@@ -37,10 +37,12 @@ func SendMail(addr string, mailbody string) {
 	msg := []byte(mailbody)
 
 	to := []string{addr}
-	err := smtp.SendMail(mail_cred.SmtpHostname+":465", auth, "noreply@api.daiquiri.org", to, msg)
-	if err != nil {
-		fmt.Println("Mail Error", err)
-	} else {
-		fmt.Println("Mail Success", err, auth)
-	}
+	go func() {
+		err := smtp.SendMail(mail_cred.SmtpHostname+":1025", auth, "noreply@api.daiquiri.org", to, msg)
+		if err != nil {
+			fmt.Println("Mail Error", err)
+		} else {
+			fmt.Println("Mail Success", err, auth)
+		}
+	}()
 }

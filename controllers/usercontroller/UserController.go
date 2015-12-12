@@ -1,15 +1,47 @@
 package usercontroller
 
 import (
+	// "crypto/sha1"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/GokulSrinivas/daiquiri/controllers"
 	"github.com/GokulSrinivas/daiquiri/database"
 	"github.com/GokulSrinivas/daiquiri/mail"
 	"github.com/asaskevich/govalidator"
 )
+
+// Helper function to generate a random string
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const (
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
+func RandString(n int) string {
+	var src = rand.NewSource(time.Now().UnixNano())
+	b := make([]byte, n)
+	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
+	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			b[i] = letterBytes[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+
+	return string(b)
+}
+
+// The User Related functions come here
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 
@@ -23,11 +55,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println(r.Form)
 
 	// Getting form data
-	name := r.FormValue("name")
-	email := r.FormValue("email")
+	// name := r.FormValue("name")
+	// email := r.FormValue("email")
 	phone := r.FormValue("phone")
 
-	age, ageerr := strconv.Atoi(r.FormValue("age"))
+	// age, ageerr := strconv.Atoi(r.FormValue("age"))
 	lat := r.FormValue("lat")
 	long := r.FormValue("long")
 
@@ -36,11 +68,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Empty Field Check (Required)
 	emptyerr := false
 
-	emptyerr = emptyerr || name == ""
-	emptyerr = emptyerr || email == ""
+	// emptyerr = emptyerr || name == ""
+	// emptyerr = emptyerr || email == ""
 	emptyerr = emptyerr || phone == ""
 
-	emptyerr = emptyerr || ageerr != nil
+	// emptyerr = emptyerr || ageerr != nil
 
 	if emptyerr {
 		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Missing Fields")
@@ -50,11 +82,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Make the new user object
 	newUser := database.User{
-		UserName:  name,
-		UserEmail: email,
+		// UserName:  name,
+		// UserEmail: email,
 		UserPhone: phone,
 
-		UserAge: age,
+		// UserAge: age,
 		PosLat:  lat,
 		PosLong: long,
 
@@ -83,37 +115,84 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println("Existing User")
 	// fmt.Println(existingUser)
 
-	var dupUser database.User
+	// var dupUser database.User
 	var dupAdharUser database.User
 	dupAdharUser.UserId = 0
 
-	db.Where("user_email = ?", newUser.UserEmail).Or("user_phone = ?", newUser.UserPhone).First(&dupUser)
+	// db.Where("user_email = ?", newUser.UserEmail).Or("user_phone = ?", newUser.UserPhone).First(&dupUser)
 
 	if aadhar != "" {
 		db.Where("user_aadhar = ?", aadhar).First(&dupAdharUser)
 	}
 	// Check if there is an existing user
-	if existingUser.UserId == 0 && dupUser.UserId == 0 && dupAdharUser.UserId == 0 {
+	if existingUser.UserId == 0 && dupAdharUser.UserId == 0 {
 		// No user exists
 		db.Create(&newUser)
 
 		if newUser.UserId == 0 {
-			controllers.WriteJson(w, r, "ERR", "Bad Data - User Already Exists")
+			controllers.WriteJson(w, r, "EXISTS", "User Already Exists")
 			return
 		}
+		// Set OTP
+		apikey := database.AppTokens{
+			UserId:       newUser.UserId,
+			User:         newUser,
+			AppOtp:       rand.Intn(100000000),
+			AppSessionId: RandString(32),
+		}
+
+		db.Create(&apikey)
 		// Set response
-		controllers.WriteJson(w, r, "OK", strconv.Itoa(newUser.UserId))
+		controllers.WriteJson(w, r, "OK", "USER CREATED")
 		return
 		// fmt.Println(newUser)
 	} else {
 		// User already exists
 		// Set response
-		controllers.WriteJson(w, r, "ERR", "User Already Exists")
+		controllers.WriteJson(w, r, "EXISTS", "User Already Exists")
 		return
 	}
 }
 
 func SendOTPEmail(w http.ResponseWriter, r *http.Request) {
 	mail.Config_Init("./mail/mail_config.json")
-	mail.SendMail("gokusrinivas@gmail.com", "Hi. Your OTP is 123123")
+	mail.SendMail("gokusrinivas@gmail.com", "<html>Hi. Your OTP is 123123</html>")
+}
+
+func AuthOTP(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+
+	phone := r.FormValue("phone")
+	otp, err2 := strconv.Atoi(r.FormValue("otp"))
+
+	if phone == "" || err2 != nil || r.FormValue("otp") == "" {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+
+	db := database.Get_DB_Object("./database/db_config.json")
+	var UserObj database.User
+	var Apikey database.AppTokens
+	db.Where("user_phone = ?", phone).First(&UserObj)
+
+	db.Where("user_id = ?", UserObj.UserId).First(&Apikey)
+
+	if UserObj.UserId == 0 || Apikey.ReqId == 0 {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+
+	if otp == Apikey.AppOtp {
+		controllers.WriteJson(w, r, "OK", Apikey.AppSessionId)
+		return
+	} else {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
 }

@@ -20,11 +20,11 @@ type DbConfig struct {
 type User struct {
 	UserId int `gorm:"primary_key" valid:"-"`
 
-	UserName  string `valid:"length(1|255),required"`
-	UserEmail string `sql:"UNIQUE" valid:"email,required"`
+	UserName  string `valid:"length(1|255)"`
+	UserEmail string `sql:"UNIQUE;default:null" valid:"email"`
 	UserPhone string `sql:"not null;UNIQUE" valid:"numeric,required,length(10|10)"`
 
-	UserAge    int    `valid:"required"`
+	UserAge    int    `valid:"-"`
 	UserAadhar string `sql:"UNIQUE;default:null" valid:"alphanum"`
 
 	Safe bool `sql:"default:false" valid:"-"`
@@ -50,10 +50,10 @@ type AppTokens struct {
 	User   User // Object so that we can get it in one query
 
 	// Web Credentials - Only one machine at a time
-	WebOtp       int
-	WebSessionId string
-	WebCreatedAt time.Time
-	WebUpdatedAt time.Time
+	// WebOtp       int
+	// WebSessionId string
+	// WebCreatedAt time.Time
+	// WebUpdatedAt time.Time
 
 	// App Credentials - Only one phone at a time
 	AppOtp       int
