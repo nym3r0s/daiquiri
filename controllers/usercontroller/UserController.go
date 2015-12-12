@@ -136,10 +136,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		}
 		// Set OTP
 		apikey := database.AppTokens{
-			UserId:       newUser.UserId,
-			User:         newUser,
-			AppOtp:       myrand.Intn(100000000),
-			AppSessionId: RandString(32),
+			UserId: newUser.UserId,
+			User:   newUser,
+			AppOtp: myrand.Intn(100000000),
+			// AppSessionId: RandString(32),
 		}
 
 		db.Create(&apikey)
@@ -194,6 +194,8 @@ func AuthOTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if otp == Apikey.AppOtp {
+		Apikey.AppSessionId = RandString(32)
+		db.Save(&Apikey)
 		controllers.WriteJson(w, r, "OK", Apikey.AppSessionId)
 		return
 	} else {
@@ -369,7 +371,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	db.Where("user_id = ?", newUser.UserId).First(&apikey)
 
 	apikey.AppOtp = myrand.Intn(100000000)
-	apikey.AppSessionId = RandString(32)
+	// apikey.AppSessionId = RandString(32)
 
 	db.Save(&apikey)
 
