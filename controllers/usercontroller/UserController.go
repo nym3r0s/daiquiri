@@ -203,57 +203,41 @@ func AuthOTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	// err := r.ParseForm()
+	// fmt.Println("Entering Update Profile")
+	err := r.ParseForm()
 
-	// if err != nil {
-	// 	// fmt.Println("Error: ", err)
-	// 	controllers.WriteJson(w, r, "ERR", "Incorrect Data")
-	// 	return
-	// }
-	// // fmt.Println(r.Form)
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+	fmt.Println(r.Form)
 
-	// // Getting form data
-	// name := r.FormValue("name")
-	// email := r.FormValue("email")
-	// phone := r.FormValue("phone")
+	// Getting form data
+	name := r.FormValue("name")
+	email := r.FormValue("email")
+	phone := r.FormValue("phone")
 
-	// age, ageerr := strconv.Atoi(r.FormValue("age"))
+	age, ageerr := strconv.Atoi(r.FormValue("age"))
 	// lat := r.FormValue("lat")
 	// long := r.FormValue("long")
 
-	// aadhar := r.FormValue("aadhar")
+	aadhar := r.FormValue("aadhar")
 
-	// // Empty Field Check (Required)
-	// emptyerr := false
+	// Empty Field Check (Required)
+	emptyerr := false
 
-	// emptyerr = emptyerr || name == ""
-	// emptyerr = emptyerr || email == ""
-	// emptyerr = emptyerr || phone == ""
+	emptyerr = emptyerr || name == ""
+	emptyerr = emptyerr || email == ""
+	emptyerr = emptyerr || phone == ""
 
-	// // emptyerr = emptyerr || ageerr != nil
+	emptyerr = emptyerr || ageerr != nil
 
-	// if emptyerr {
-	// 	controllers.WriteJson(w, r, "ERR", "Incorrect Data, Missing Fields")
-	// 	return
-	// 	fmt.Println("Failed Empty check")
-	// }
-
-	// // Make the new user object
-	// newUser := database.User{
-	// 	// UserName:  name,
-	// 	// UserEmail: email,
-	// 	UserPhone: phone,
-
-	// 	// UserAge: age,
-	// 	PosLat:  lat,
-	// 	PosLong: long,
-
-	// 	Safe: false,
-	// }
-
-	// if aadhar != "" {
-	// 	newUser.UserAadhar = aadhar
-	// }
+	if emptyerr {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Missing Fields")
+		return
+		fmt.Println("Failed Empty check")
+	}
 
 	// // Validate with Govalidator - Should catch all the errors
 	// _, structerr := govalidator.ValidateStruct(newUser)
@@ -263,55 +247,32 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	// // DB operations start here
-	// db := database.Get_DB_Object("./database/db_config.json")
+	// DB operations start here
+	db := database.Get_DB_Object("./database/db_config.json")
+	var newUser database.User
+	db.Where("user_phone = ?", phone).First(&newUser)
+	// Make the new user object
+	if newUser.UserId == 0 {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Missing Fields")
+		return
+		fmt.Println("Failed Empty check")
+	}
 
-	// // Check if user exists
-	// existingUser := new(database.User)
-	// db.Where(newUser).First(&existingUser)
+	newUser.UserName = name
+	newUser.UserEmail = email
+	newUser.UserPhone = phone
+	newUser.UserAge = age
 
-	// // fmt.Println("Existing User")
-	// // fmt.Println(existingUser)
+	db.Save(&newUser)
 
-	// // var dupUser database.User
-	// var dupAdharUser database.User
-	// dupAdharUser.UserId = 0
+	if aadhar != "" {
 
-	// // db.Where("user_email = ?", newUser.UserEmail).Or("user_phone = ?", newUser.UserPhone).First(&dupUser)
+		db.Exec("UPDATE user SET user_aadhar=? WHERE user_id = ?", aadhar, newUser.UserId)
+	} else {
+		fmt.Println("Empty Aadhar Number")
+		db.Exec("UPDATE user SET user_aadhar=NULL WHERE user_id = ? and user_aadhar='' ", newUser.UserId)
+	}
 
-	// if aadhar != "" {
-	// 	db.Where("user_aadhar = ?", aadhar).First(&dupAdharUser)
-	// }
-	// // Check if there is an existing user
-	// if existingUser.UserId == 0 && dupAdharUser.UserId == 0 {
-	// 	// No user exists
-	// 	db.Create(&newUser)
-
-	// 	if newUser.UserId == 0 {
-	// 		controllers.WriteJson(w, r, "EXISTS", "User Already Exists")
-	// 		return
-	// 	}
-	// 	// Set OTP
-	// 	apikey := database.AppTokens{
-	// 		UserId:       newUser.UserId,
-	// 		User:         newUser,
-	// 		AppOtp:       myrand.Intn(100000000),
-	// 		AppSessionId: RandString(32),
-	// 	}
-
-	// 	db.Create(&apikey)
-	// 	// Send OTP
-	// 	go func() {
-	// 		SendOTPEmail(w, r, newUser.UserEmail, strconv.Itoa(apikey.AppOtp))
-	// 	}()
-	// 	// Set response
-	// 	controllers.WriteJson(w, r, "OK", "USER CREATED")
-	// 	return
-	// 	// fmt.Println(newUser)
-	// } else {
-	// 	// User already exists
-	// 	// Set response
-	// 	controllers.WriteJson(w, r, "EXISTS", "User Already Exists")
-	// 	return
-	// }
+	controllers.WriteJson(w, r, "OK", "Updated Successfully")
+	return
 }

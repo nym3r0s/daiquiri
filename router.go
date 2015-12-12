@@ -5,6 +5,7 @@ import (
 
 	"github.com/GokulSrinivas/daiquiri/controllers/errorcontroller"
 	"github.com/GokulSrinivas/daiquiri/controllers/usercontroller"
+	"github.com/GokulSrinivas/daiquiri/middleware"
 	// "github.com/GokulSrinivas/daiquiri/mail"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
@@ -13,9 +14,11 @@ import (
 func main() {
 	router := mux.NewRouter()
 	apirouter := router.PathPrefix("/api").Subrouter()
-
+	secureapirouter := router.PathPrefix("/api/s").Subrouter()
 	apirouter.HandleFunc("/user/create", usercontroller.CreateUser).Methods("POST")
 	apirouter.HandleFunc("/user/auth", usercontroller.AuthOTP).Methods("POST")
+
+	secureapirouter.HandleFunc("/user/updateprofile", middleware.UserAuth(usercontroller.UpdateProfile))
 
 	router.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
 	apirouter.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
