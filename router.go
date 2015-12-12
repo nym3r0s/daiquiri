@@ -27,7 +27,7 @@ func main() {
 	secureapirouter.HandleFunc("/user/updatestatusaadhar", middleware.UserAuth(usercontroller.UpdateStatusAadhar))
 
 	adminapirouter.HandleFunc("/getmapdata", admincontroller.GetMapData).Methods("POST")
-	adminapirouter.HandleFunc("/updateuserstatus", admincontroller.GetMapData).Methods("POST")
+	adminapirouter.HandleFunc("/updateuserstatus", admincontroller.UpdateUserStatus).Methods("POST")
 
 	router.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
 	apirouter.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)

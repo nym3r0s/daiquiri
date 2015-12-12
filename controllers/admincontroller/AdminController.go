@@ -108,8 +108,8 @@ func UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
 
 	admin_handle := r.FormValue("admin_handle")
 	admin_pass := r.FormValue("admin_password")
-	user_phone := r.FormValue("admin_password")
-	user_status, err2 := strconv.ParseBool(r.FormValue("admin_password"))
+	user_phone := r.FormValue("user_phone")
+	user_status, err2 := strconv.ParseBool(r.FormValue("user_status"))
 
 	if admin_handle == "" || admin_pass == "" || err2 != nil {
 		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Empty value")
@@ -147,6 +147,23 @@ func UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
 	newUser.Safe = user_status
 	db.Save(&newUser)
 
+	if newUser.UserAadhar != "" {
+
+		// db.Exec("UPDATE user SET user_aadhar=? WHERE user_id = ?", newUser, newUser.UserId)
+	} else {
+		fmt.Println("Empty Aadhar Number")
+		db.Exec("UPDATE user SET user_aadhar=NULL WHERE user_id = ? and user_aadhar='' ", newUser.UserId)
+	}
+
+	if newUser.UserEmail != "" {
+
+		// db.Exec("UPDATE user SET user_aadhar=? WHERE user_id = ?", newUser, newUser.UserId)
+	} else {
+		fmt.Println("Empty Email Number")
+		db.Exec("UPDATE user SET user_email=NULL WHERE user_id = ? and user_email='' ", newUser.UserId)
+	}
+
 	controllers.WriteJson(w, r, "OK", "Status Updated Successfully")
 	return
+
 }
