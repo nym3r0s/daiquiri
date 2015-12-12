@@ -417,6 +417,8 @@ func UpdateStatusAadhar(w http.ResponseWriter, r *http.Request) {
 	if newUser.UserId != 0 {
 		newUser.Safe = true
 		db.Save(&newUser)
+		controllers.WriteJson(w, r, "OK", "Updated Successfully")
+		return
 	} else {
 		controllers.WriteJson(w, r, "ERR", "Incorrect Data. User Not Found")
 		return
