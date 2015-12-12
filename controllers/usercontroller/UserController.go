@@ -274,7 +274,7 @@ func UpdateStatus(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		// fmt.Println("Error: ", err)
-		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. FormParseError")
 		return
 	}
 	fmt.Println(r.Form)
@@ -286,13 +286,19 @@ func UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	long := r.FormValue("long")
 
 	safe := r.FormValue("safe")
+
+	var err2 error
+	err2 = nil
+	var safebool bool
+
 	if safe == "" {
-		safe = "false"
+		safe = ""
+	} else {
+		safebool, err2 = strconv.ParseBool(safe)
 	}
-	safebool, err2 := strconv.ParseBool(safe)
 
 	if err2 != nil || lat == "" || long == "" || !govalidator.IsLatitude(lat) || !govalidator.IsLongitude(long) {
-		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Missing Fields")
 		return
 	}
 
@@ -307,6 +313,9 @@ func UpdateStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if safe == "" {
+		safebool = newUser.Safe
+	}
 	newUser.PosLat = lat
 	newUser.PosLong = long
 	newUser.Safe = safebool
