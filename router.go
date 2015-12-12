@@ -28,6 +28,7 @@ func main() {
 
 	adminapirouter.HandleFunc("/getmapdata", admincontroller.GetMapData).Methods("POST")
 	adminapirouter.HandleFunc("/updateuserstatus", admincontroller.UpdateUserStatus).Methods("POST")
+	adminapirouter.HandleFunc("/getuserdata", admincontroller.GetUserData).Methods("POST")
 
 	router.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)
 	apirouter.NotFoundHandler = http.HandlerFunc(errorcontroller.Error404)

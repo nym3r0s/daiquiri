@@ -167,3 +167,66 @@ func UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func GetUserData(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
+		return
+	}
+
+	admin_handle := r.FormValue("admin_handle")
+	admin_pass := r.FormValue("admin_password")
+	user_phone := r.FormValue("user_phone")
+
+	if admin_handle == "" || admin_pass == "" || user_phone == "" {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data, Empty value")
+		return
+	}
+
+	var newAdmin database.Admin
+
+	db := database.Get_DB_Object("./database/db_config.json")
+
+	db.Where("admin_handle = ?", admin_handle).Where("admin_password = ?", admin_pass).First(&newAdmin)
+
+	fmt.Println(newAdmin.AdminHandle == "")
+
+	if newAdmin.AdminHandle == "" {
+		controllers.WriteJson(w, r, "AUTH", "Invalid Credentials")
+		return
+	}
+
+	// Authenticated User. Send the data
+
+	var newUser database.User
+
+	db.Where("user_phone = ?", user_phone).First(&newUser)
+
+	if newUser.UserId == 0 {
+		controllers.WriteJson(w, r, "ERR", "No user exists")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	response := struct {
+		Status string        `json:"status"`
+		Data   database.User `json:"data"`
+	}{
+		Status: "OK",
+		Data:   newUser,
+	}
+
+	myjsonresponse, err := json.Marshal(response)
+
+	if err == nil {
+		w.Write(myjsonresponse)
+	} else {
+		//peace
+		fmt.Println("Error in response data", err)
+	}
+
+}
