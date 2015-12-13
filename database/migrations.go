@@ -29,8 +29,8 @@ type User struct {
 
 	Safe bool `sql:"default:false" valid:"-"`
 
-	PosLat  string `valid:"latitude,required"`
-	PosLong string `valid:"longitude,required"`
+	PosLat  string `valid:"latitude"`
+	PosLong string `valid:"longitude"`
 
 	CreatedAt time.Time `sql:"default:now()" valid:"-"`
 	UpdatedAt time.Time `sql:"default:now()" valid:"-"`

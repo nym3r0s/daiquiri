@@ -41,11 +41,23 @@ func RandString(n int) string {
 	return string(b)
 }
 
+func randnum(size int) int {
+	var src = rand.NewSource(time.Now().UnixNano())
+	myrand := rand.New(src)
+	var alpha = "123456789"
+	buf := make([]byte, size)
+	for i := 0; i < size; i++ {
+		buf[i] = alpha[myrand.Intn(len(alpha))]
+	}
+	num, _ := strconv.Atoi(string(buf))
+	return num
+}
+
 // The User Related functions come here
 
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	myrand := rand.New(s1)
+	// s1 := rand.NewSource(time.Now().UnixNano())
+	// myrand := rand.New(s1)
 	err := r.ParseForm()
 
 	if err != nil {
@@ -53,7 +65,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		controllers.WriteJson(w, r, "ERR", "Incorrect Data")
 		return
 	}
-	// fmt.Println(r.Form)
+	fmt.Println(r.Form)
 
 	// Getting form data
 	// name := r.FormValue("name")
@@ -61,8 +73,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 
 	// age, ageerr := strconv.Atoi(r.FormValue("age"))
-	lat := r.FormValue("lat")
-	long := r.FormValue("long")
+	// lat := r.FormValue("lat")
+	// long := r.FormValue("long")
 
 	aadhar := r.FormValue("aadhar")
 
@@ -88,8 +100,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		UserPhone: phone,
 
 		// UserAge: age,
-		PosLat:  lat,
-		PosLong: long,
+		// PosLat:  lat,
+		// PosLong: long,
 
 		Safe: false,
 	}
@@ -138,7 +150,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		apikey := database.AppTokens{
 			UserId: newUser.UserId,
 			User:   newUser,
-			AppOtp: myrand.Intn(100000000),
+			AppOtp: randnum(8),
 			// AppSessionId: RandString(32),
 		}
 
