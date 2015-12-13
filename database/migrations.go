@@ -37,11 +37,11 @@ type User struct {
 }
 
 type Friend struct {
-	FriendId      int  `gorm:"primary_key"`
-	UserId        int  // The User who allows people to track him
-	User          User // User Object that has Id UserId
-	TrackableBy   int  // The users who can track the user (UserId)
-	TrackableUser User // User Object that has Id TrackableBy
+	FriendId      int    `gorm:"primary_key"`
+	UserPhone     string // The User who allows people to track him
+	User          User   // User Object that has Id UserId
+	TrackableBy   string // The users who can track the user (UserId)
+	TrackableUser User   // User Object that has Id TrackableBy
 }
 
 type AppTokens struct {

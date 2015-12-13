@@ -436,3 +436,40 @@ func UpdateStatusAadhar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func AddFriend(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. FormParseError")
+		return
+	}
+	fmt.Println(r.Form)
+
+	// Getting form data
+	friend := r.FormValue("friend")
+	phone := r.FormValue("phone")
+
+	if friend == "" || phone == "" {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. empty fields")
+		return
+	}
+
+	db := database.Get_DB_Object("./database/db_config.json")
+
+	var newFriend database.Friend
+	db.Where("trackable_by = ?", friend).Where("user_phone = ?", phone).First(&newFriend)
+
+	if newFriend.FriendId == 0 {
+		newFriend.UserPhone = phone
+		newFriend.TrackableBy = friend
+		db.Save(&newFriend)
+		controllers.WriteJson(w, r, "OK", "Updated Successfully")
+		return
+	} else {
+		controllers.WriteJson(w, r, "ERR", "Incorrect Data. User Not Found")
+		return
+	}
+}
